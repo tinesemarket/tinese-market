@@ -1,0 +1,16 @@
+<h1>Panier</h1>
+
+{% for item in cart.values %}
+    <p>
+        {{ item.name }} —
+        {{ item.qty }} × {{ item.price }} FCFA
+        <a href="{% url 'add_to_cart' item.product_id %}">+</a>
+        <a href="{% url 'decrease_cart' item.product_id %}">−</a>
+        <a href="{% url 'remove_from_cart' item.product_id %}">❌</a>
+    </p>
+{% empty %}
+    <p>Panier vide</p>
+{% endfor %}
+
+<hr>
+<strong>Total : {{ total }} FCFA</strong>

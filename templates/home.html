@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO ================= -->
+<section class="hero-shop">
+    <div class="hero-content">
+        <h1>Mode & Artisanat Africain</h1>
+        <p class="hero-subtitle">
+            Découvrez des produits authentiques faits avec passion
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'shop' %}" class="btn primary">
+                🛍 Accéder à la boutique
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================= CATEGORIES ================= -->
+
+<section class="home-categories">
+    <h2>Nos catégories</h2>
+
+    <div class="category-grid">
+        
+        {% for category in categories %}
+        <a href="{% url 'shop_by_category' category.slug %}" class="category-card">
+            <span>🎩</span>
+            <h3>{{ category.name }}</h3>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+
+<!-- ================= PRODUITS VEDETTES ================= -->
+<section class="featured-products">
+    <h2>Produits populaires</h2>
+
+    <div class="products">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-image">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            </div>
+
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.price }} FCFA</p>
+
+                <a href="{% url 'add_to_cart' product.id %}" class="btn-add">
+                    Ajouter au panier
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="center">
+        <a href="{% url 'shop' %}" class="btn primary">Voir tous les produits</a>
+    </div>
+</section>
+
+<!-- ================= AVANTAGES ================= -->
+<section class="shop-benefits">
+    <div class="benefit">
+        🚚 <strong>Livraison rapide</strong><br>
+        Partout dans le pays
+    </div>
+
+    <div class="benefit">
+        🔒 <strong>Paiement sécurisé</strong><br>
+        Stripe & Mobile Money
+    </div>
+
+    <div class="benefit">
+        ⭐ <strong>Produits authentiques</strong><br>
+        Qualité garantie
+    </div>
+</section>
+
+{% endblock %}

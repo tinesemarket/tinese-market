@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Boutique{% endblock %}
+
+{% block content %}
+<h1 class="page-title">La boutique Tinese Market</h1>
+
+<div class="products">
+    {% for product in products %}
+        <div class="product-card">
+
+            <div class="product-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% endif %}
+            </div>
+
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.description|truncatechars:80 }}</p>
+
+                <!-- ✅ STOCK -->
+                {% if product.stock > 0 %}
+                    <p class="stock in-stock">
+                        Stock disponible : {{ product.stock }}
+                    </p>
+                {% else %}
+                    <p class="stock out-stock">
+                        ❌ Stock épuisé
+                    </p>
+                {% endif %}
+
+                <div class="product-footer">
+                    <span class="price">{{ product.price }} FCFA</span>
+
+                    {% if product.stock > 0 %}
+                        <a class="btn-add"
+                           href="{% url 'add_to_cart' product.id %}">
+                            + Panier
+                        </a>
+                    {% else %}
+                        <button class="btn-add disabled" disabled>
+                            Indisponible
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    {% empty %}
+        <p>Aucun produit</p>
+    {% endfor %}
+</div>
+{% endblock %}

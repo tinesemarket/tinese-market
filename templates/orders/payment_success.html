@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Paiement réussi{% endblock %}
+
+{% block content %}
+<h2>✅ Paiement réussi</h2>
+<p>Commande #{{ order.id }} payée avec succès.</p>
+<a href="/boutique/">Retour à la boutique</a>
+{% endblock %}

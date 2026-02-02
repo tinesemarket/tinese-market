@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-title">🛒 Mon panier</h1>
+
+{% if cart %}
+<div class="cart-container">
+
+    {% for id, item in cart.items %}
+    <div class="cart-card">
+        {% if item.image %}
+        <img src="{{ item.image }}" class="cart-image">
+        {% endif %}
+
+        <div class="cart-info">
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.price }} FCFA</p>
+
+            <div class="cart-actions">
+                <a href="{% url 'decrease_cart' id %}" class="btn minus">−</a>
+                <span class="qty">{{ item.qty }}</span>
+                <a href="{% url 'add_to_cart' id %}" class="btn plus">+</a>
+            </div>
+
+            <a href="{% url 'remove_from_cart' id %}" class="remove">Supprimer</a>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+<div class="cart-summary">
+    <h2>Total : {{ total_price }} FCFA</h2>
+    <a href="{% url 'create_order' %}" class="btn primary">🧾 Commander</a>
+</div>
+
+{% else %}
+<p class="empty-cart">Votre panier est vide.</p>
+{% endif %}
+{% endblock %}

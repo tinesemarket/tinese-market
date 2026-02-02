@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Paiement Mobile Money{% endblock %}
+
+{% block content %}
+<div class="order-card">
+    <h2>Paiement Mobile Money</h2>
+
+    <p>Commande #{{ order.id }}</p>
+    <p><strong>Montant : {{ order.total_price }} FCFA</strong></p>
+
+    <hr>
+
+    <p>
+        📱 Envoyez le paiement via :
+        <br><strong>MTN / Orange / Wave</strong>
+        <br>📞 07 57 01 86 03
+    </p>
+
+    <p class="status pending">
+        ⏳ En attente de confirmation
+    </p>
+
+    <small>
+        Votre commande sera validée après réception du paiement.
+    </small>
+</div>
+{% endblock %}

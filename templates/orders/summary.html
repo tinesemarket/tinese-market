@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Commande {{ order.id }}{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Commande #{{ order.id }}</h1>
+
+<div class="order-card">
+
+    <div class="order-header">
+        <div>Produit</div>
+        <div>Quantité</div>
+        <div>Prix</div>
+    </div>
+
+    {% for item in order.items.all %}
+    <div class="order-row">
+        <div>{{ item.product.name }}</div>
+        <div>{{ item.quantity }}</div>
+        <div>{{ item.price }} FCFA</div>
+    </div>
+    {% endfor %}
+
+    <div class="order-total">
+        Total : <strong>{{ order.total_price }} FCFA</strong>
+    </div>
+
+    <div class="order-pay">
+        <a href="{% url 'payment_start' order.id %}" class="btn primary">
+            💳 Payer maintenant
+        </a>
+    </div>
+
+</div>
+
+<div class="order-pay">
+    <h3>Choisissez un moyen de paiement</h3>
+
+    <!-- 💳 Stripe -->
+    <a href="{% url 'payment_stripe' order.id %}"
+       class="btn primary">
+        💳 Payer par carte (Stripe)
+    </a>
+
+    <br><br>
+
+    <!-- 📱 Mobile Money -->
+    <a href="{% url 'mobile_payment' order.id %}"
+       class="btn secondary">
+        📱 Payer par Mobile Money
+    </a>
+</div>
+
+
+{% endblock %}

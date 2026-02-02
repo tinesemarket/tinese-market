@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mon site{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <!-- ===== HEADER / MENU ===== -->
+    <nav>
+        <button class="menu-toggle" onclick="document.body.classList.toggle('menu-open')">
+        ☰
+        </button>
+
+        <a href="{% url 'home' %}" class="logo">Tinese-Market</a>
+
+        <a href="{% url 'shop' %}">Boutique</a>
+
+        <!-- PANIER -->
+        <a href="{% url 'cart_detail' %}" class="cart-link">
+            🛒
+            {% if request.session.cart %}
+                <span class="cart-badge">
+                    {{ request.session.cart|length }}
+                </span>
+            {% endif %}
+        </a>
+
+        <!-- COMPTE -->
+         {% if user.is_authenticated %}
+            <span>Bonjour {{ user.username }}</span>
+            <a href="{% url 'logout' %}">Déconnexion</a>
+             <a href="{% url 'my_orders' %}">👤 Mon compte</a>
+        {% else %}
+            <a href="{% url 'register' %}">Inscription</a>
+            <a href="{% url 'login' %}">Connexion</a>
+        {% endif %}
+
+        
+    </nav>
+
+    <!-- ===== CONTENU ===== -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+    <div class="footer-grid">
+
+        <div>
+            <h3>Tinese Market</h3>
+            <p>Mode & artisanat africain authentique.</p>
+        </div>
+
+        <div>
+            <h4>Navigation</h4>
+            <a href="{% url 'home' %}">Accueil</a>
+            <a href="{% url 'shop' %}">Boutique</a>
+            <a href="{% url 'cart_detail' %}">Panier</a>
+        </div>
+
+        <div>
+            <h4>Contact</h4>
+            <p>Email : tinesemarket@gmail.com</p>
+            <p>Tél : +225 07 57 01 86 03</p>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        © Tinese Market — Tous droits réservés
+    </div>
+</footer>
+
+
+</body>
+
+</html>

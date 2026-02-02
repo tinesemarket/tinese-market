@@ -1,0 +1,15 @@
+<h2 class="page-title">Choisissez un mode de paiement</h2>
+
+<div class="payment-options">
+
+    <a href="{% url 'payment_stripe' order.id %}" class="payment-card">
+        <h3>💳 Carte bancaire</h3>
+        <p>Paiement sécurisé par Stripe</p>
+    </a>
+
+    <a href="{% url 'mobile_payment' order.id %}" class="payment-card mobile">
+        <h3>📱 Mobile Money</h3>
+        <p>Wave · Orange · MTN</p>
+    </a>
+
+</div>

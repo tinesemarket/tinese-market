@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Mes commandes{% endblock %}
+
+{% block content %}
+<h1 class="page-title">📦 Mes commandes</h1>
+
+{% if orders %}
+<div class="order-card">
+    {% for order in orders %}
+    <div class="order-row">
+        <strong>Commande #{{ order.id }}</strong>
+        <span>{{ order.created_at|date:"d/m/Y" }}</span>
+        <span>{{ order.total_price }} FCFA</span>
+        <a href="{% url 'order_detail' order.id %}">Voir</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="text-align:center;">Aucune commande pour le moment.</p>
+{% endif %}
+{% endblock %}

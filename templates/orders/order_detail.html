@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Commande #{{ order.id }}{% endblock %}
+
+{% block content %}
+
+<div class="order-card">
+
+    <h1>🧾 Commande #{{ order.id }}</h1>
+
+    <div class="order-header">
+        <span>Produit</span>
+        <span>Quantité</span>
+        <span>Prix</span>
+    </div>
+
+    {% for item in order.items.all %}
+    <div class="order-row">
+        <span>{{ item.product.name }}</span>
+        <span>{{ item.quantity }}</span>
+        <span>{{ item.price }} FCFA</span>
+    </div>
+    {% endfor %}
+
+    <div class="order-total">
+        <strong>Total : {{ order.total_price }} FCFA</strong>
+    </div>
+
+    <div class="order-pay">
+        <a href="{% url 'payment_start' order.id %}" class="btn primary">
+            💳 Payer maintenant
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}
