@@ -1,5 +1,16 @@
-venv/
+# Python
 __pycache__/
+*.pyc
+*.pyo
+
+# Django
 db.sqlite3
-.env
 staticfiles/
+
+# Environnements
+.env
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
