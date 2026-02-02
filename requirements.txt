@@ -1,4 +1,7 @@
-Django
+Django==6.0.1
 gunicorn
 stripe
 Pillow
+whitenoise
+psycopg2-binary
+
