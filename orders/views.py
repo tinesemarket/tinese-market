@@ -70,12 +70,17 @@ def payment_start(request, order_id):
         user=request.user
     )
 
-    # Créer un paiement "en attente" si pas encore existant
+    # 🔒 Sécurité 1 : si la commande est déjà payée → bloquer
+    if hasattr(order, 'payment') and order.payment.status == 'paid':
+        return redirect('order_summary', order_id=order.id)
+
+    # 🔒 Sécurité 2 : un seul paiement par commande
     payment, created = Payment.objects.get_or_create(
         order=order,
         defaults={
             'amount': order.total_price,
-            'status': 'pending'
+            'status': 'pending',
+            'method': 'stripe'
         }
     )
 
@@ -83,6 +88,7 @@ def payment_start(request, order_id):
         'order': order,
         'payment': payment
     })
+
 
 @login_required
 def order_summary(request, order_id):
@@ -100,7 +106,6 @@ def payment_choice(request, order_id):
     return render(request, 'orders/payment_choice.html', {
         'order': order
     })
-
 
 
 @login_required
@@ -132,6 +137,8 @@ def payment_stripe(request, order_id):
     )
 
     return redirect(session.url)
+
+    
 
 @login_required
 def mobile_payment(request, order_id):
