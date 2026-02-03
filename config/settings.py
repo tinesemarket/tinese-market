@@ -23,12 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-41p*_^zcayu_u+kav2r0z*)%=849&ea+x960osrm_%ar9pa4e('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =False
+DEBUG =True
 
-ALLOWED_HOSTS = ['localhost',
-    '127.0.0.1',
-    '.onrender.com',
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -49,6 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
