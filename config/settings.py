@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-41p*_^zcayu_u+kav2r0z*)%=849&ea+x960osrm_%ar9pa4e('
+SECRET_KEY = os.environ.get('SECRET_KEY', 'unsafe-secret-for-local-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -121,16 +123,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-STRIPE_SECRET_KEY = "sk_test_51SrRNoBwI5TD7uBKxRxturUo9prswV3YJTwmtKZMZEX68RQY7NPIhBHOK0lxL1loSI6IQeyiUVjeVKJVmUbQMTPO00AUmE9Zyv"
-STRIPE_PUBLIC_KEY = "pk_test_51SrRNoBwI5TD7uBKNdWBhmYj8dCFb2NJF9JcbdbuPL81XU4gkiu5n4TUCJ9Sslee0YsUQrZEOUOhb2yeqBLS2IXN00xYPJ4hGg"
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+
 
