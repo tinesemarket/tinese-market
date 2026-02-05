@@ -112,7 +112,11 @@ def payment_choice(request, order_id):
 def payment_stripe(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    Payment.objects.get_or_create(
+    # 🔒 Empêche double paiement
+    if hasattr(order, 'payment') and order.payment.status == 'paid':
+        return redirect('order_summary', order_id=order.id)
+
+    payment, created = Payment.objects.get_or_create(
         order=order,
         defaults={
             'amount': order.total_price,
@@ -121,22 +125,31 @@ def payment_stripe(request, order_id):
         }
     )
 
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
             'price_data': {
                 'currency': 'eur',
-                'product_data': {'name': f'Commande #{order.id}'},
+                'product_data': {
+                    'name': f'Commande #{order.id}',
+                },
                 'unit_amount': int(order.total_price * 100),
             },
             'quantity': 1,
         }],
         mode='payment',
-        success_url=request.build_absolute_uri('/'),
-        cancel_url=request.build_absolute_uri('/'),
+        success_url=request.build_absolute_uri(
+            f'/orders/success/{order.id}/'
+        ),
+        cancel_url=request.build_absolute_uri(
+            f'/orders/summary/{order.id}/'
+        ),
     )
 
     return redirect(session.url)
+
 
     
 
@@ -154,3 +167,16 @@ def mobile_payment(request, order_id):
     )
 
     return render(request, 'orders/mobile_instructions.html', {'order': order})
+
+@login_required
+def payment_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    payment = get_object_or_404(Payment, order=order)
+
+    payment.status = 'paid'
+    payment.save()
+
+    return render(request, 'orders/payment_success.html', {
+        'order': order
+    })

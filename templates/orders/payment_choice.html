@@ -1,22 +1,28 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Paiement{% endblock %}
 
 {% block content %}
-<h2 class="page-title">💳 Choisissez votre moyen de paiement</h2>
+<h2 style="text-align:center;">Choisissez un moyen de paiement</h2>
 
 <div class="payment-options">
 
-    <a href="{% url 'payment_stripe' order.id %}" class="payment-card">
+    <!-- 💳 STRIPE -->
+    <a href="{% url 'payment_stripe' order.id %}"
+       class="payment-card"
+       onclick="this.style.pointerEvents='none'; this.innerText='Paiement en cours…';">
         <h3>💳 Carte bancaire</h3>
-        <p>Paiement sécurisé par Stripe</p>
+        <p>Paiement sécurisé via Stripe</p>
     </a>
 
-    <a href="{% url 'mobile_payment' order.id %}" class="payment-card mobile">
+    <!-- 📱 MOBILE MONEY -->
+    <a href="{% url 'mobile_payment' order.id %}"
+       class="payment-card mobile">
         <h3>📱 Mobile Money</h3>
-        <p>Wave · Orange · MTN</p>
+        <p>Paiement manuel sécurisé</p>
     </a>
 
 </div>
-
-
 {% endblock %}
+
