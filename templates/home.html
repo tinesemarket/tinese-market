@@ -28,7 +28,7 @@
     <div class="category-grid">
         
         {% for category in categories %}
-        <!--<a href="{% url 'shop_by_category' category.slug %}" class="category-card">-->
+        <a href="{% url 'shop_by_category' category.slug %}" class="category-card">
             <span>🎩</span>
             <h3>{{ category.name }}</h3>
         </a>
@@ -58,7 +58,7 @@
                 <h3>{{ product.name }}</h3>
                 <p>{{ product.price }} FCFA</p>
 
-                <!--<a href="{% url 'add_to_cart' product.id %}" class="btn-add">-->
+                <a href="{% url 'add_to_cart' product.id %}" class="btn-add">
                     Ajouter au panier
                 </a>
             </div>
@@ -67,7 +67,7 @@
     </div>
 
     <div class="center">
-    <!--<a href="{% url 'shop' %}" class="btn primary">Voir tous les produits</a>-->
+    <a href="{% url 'shop' %}" class="btn primary">Voir tous les produits</a>
     </div>
 </section>
 
