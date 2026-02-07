@@ -1,15 +1,30 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
+
 from boutique.models import Product
 from cart.cart import Cart
 from .models import Order, OrderItem, Payment
 from .utils import send_order_confirmation
-from django.conf import settings
-import stripe
-
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+# =========================
+# 🔐 STRIPE SAFE LOADER
+# =========================
+def get_stripe_key():
+    """
+    Retourne la clé Stripe si elle existe.
+    Ne fait JAMAIS planter Django.
+    """
+    key = getattr(settings, "STRIPE_SECRET_KEY", None)
+    if not key or key.strip() == "":
+        return None
+    return key
+
+
+# =========================
+# 🛒 CRÉATION COMMANDE
+# =========================
 @login_required
 def create_order(request):
     cart = Cart(request)
@@ -24,11 +39,9 @@ def create_order(request):
 
     send_order_confirmation(order)
 
-    # 🔁 BOUCLE OBLIGATOIRE
     for product_id, item in cart.cart.items():
         product = Product.objects.get(id=product_id)
 
-        # 🔴 Sécurité stock
         if product.stock < item['qty']:
             return redirect('cart_detail')
 
@@ -39,7 +52,6 @@ def create_order(request):
             quantity=item['qty']
         )
 
-        # ✅ Décrément du stock
         product.stock -= item['qty']
         product.save()
 
@@ -47,35 +59,35 @@ def create_order(request):
     return redirect('order_summary', order_id=order.id)
 
 
+# =========================
+# 📄 DÉTAIL COMMANDE
+# =========================
 @login_required
 def order_detail(request, order_id):
-    order = get_object_or_404(
-        Order,
-        id=order_id,
-        user=request.user
-    )
-
-    return render(request, 'orders/order_detail.html', {
-        'order': order
-    })
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'orders/order_detail.html', {'order': order})
 
 
+# =========================
+# 💳 CHOIX PAIEMENT
+# =========================
+@login_required
+def payment_choice(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'orders/payment_choice.html', {'order': order})
 
 
+# =========================
+# 💳 DÉMARRAGE PAIEMENT
+# =========================
 @login_required
 def payment_start(request, order_id):
-    order = get_object_or_404(
-        Order,
-        id=order_id,
-        user=request.user
-    )
+    order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    # 🔒 Sécurité 1 : si la commande est déjà payée → bloquer
     if hasattr(order, 'payment') and order.payment.status == 'paid':
         return redirect('order_summary', order_id=order.id)
 
-    # 🔒 Sécurité 2 : un seul paiement par commande
-    payment, created = Payment.objects.get_or_create(
+    Payment.objects.get_or_create(
         order=order,
         defaults={
             'amount': order.total_price,
@@ -85,38 +97,29 @@ def payment_start(request, order_id):
     )
 
     return render(request, 'orders/payment_start.html', {
-        'order': order,
-        'payment': payment
-    })
-
-
-@login_required
-def order_summary(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'orders/summary.html', {
         'order': order
     })
 
 
-
-@login_required
-def payment_choice(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-
-    return render(request, 'orders/payment_choice.html', {
-        'order': order
-    })
-
-
+# =========================
+# 💳 STRIPE CHECKOUT
+# =========================
 @login_required
 def payment_stripe(request, order_id):
+    stripe_key = get_stripe_key()
+
+    if stripe_key is None:
+        return render(request, 'orders/payment_unavailable.html')
+
+    import stripe
+    stripe.api_key = stripe_key
+
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    # 🔒 Empêche double paiement
     if hasattr(order, 'payment') and order.payment.status == 'paid':
         return redirect('order_summary', order_id=order.id)
 
-    payment, created = Payment.objects.get_or_create(
+    Payment.objects.get_or_create(
         order=order,
         defaults={
             'amount': order.total_price,
@@ -124,8 +127,6 @@ def payment_stripe(request, order_id):
             'status': 'pending'
         }
     )
-
-    stripe.api_key = settings.STRIPE_SECRET_KEY
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -151,8 +152,9 @@ def payment_stripe(request, order_id):
     return redirect(session.url)
 
 
-    
-
+# =========================
+# 📱 MOBILE MONEY
+# =========================
 @login_required
 def mobile_payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -168,15 +170,25 @@ def mobile_payment(request, order_id):
 
     return render(request, 'orders/mobile_instructions.html', {'order': order})
 
+
+# =========================
+# ✅ SUCCÈS PAIEMENT
+# =========================
 @login_required
 def payment_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-
     payment = get_object_or_404(Payment, order=order)
 
     payment.status = 'paid'
     payment.save()
 
-    return render(request, 'orders/payment_success.html', {
-        'order': order
-    })
+    return render(request, 'orders/payment_success.html', {'order': order})
+
+
+# =========================
+# 📄 RÉCAP
+# =========================
+@login_required
+def order_summary(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'orders/summary.html', {'order': order})
