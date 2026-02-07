@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
+from django.db import transaction
 
 from boutique.models import Product
 from cart.cart import Cart
@@ -17,7 +18,7 @@ def get_stripe_key():
     Ne fait JAMAIS planter Django.
     """
     key = getattr(settings, "STRIPE_SECRET_KEY", None)
-    if not key or key.strip() == "":
+    if not key or not isinstance(key, str) or key.strip() == "":
         return None
     return key
 
@@ -26,6 +27,7 @@ def get_stripe_key():
 # 🛒 CRÉATION COMMANDE
 # =========================
 @login_required
+@transaction.atomic
 def create_order(request):
     cart = Cart(request)
 
@@ -40,7 +42,10 @@ def create_order(request):
     send_order_confirmation(order)
 
     for product_id, item in cart.cart.items():
-        product = Product.objects.get(id=product_id)
+        product = get_object_or_404(
+            Product.objects.select_for_update(),
+            id=product_id
+        )
 
         if product.stock < item['qty']:
             return redirect('cart_detail')
@@ -96,9 +101,7 @@ def payment_start(request, order_id):
         }
     )
 
-    return render(request, 'orders/payment_start.html', {
-        'order': order
-    })
+    return render(request, 'orders/payment_start.html', {'order': order})
 
 
 # =========================
@@ -116,10 +119,7 @@ def payment_stripe(request, order_id):
 
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    if hasattr(order, 'payment') and order.payment.status == 'paid':
-        return redirect('order_summary', order_id=order.id)
-
-    Payment.objects.get_or_create(
+    payment, created = Payment.objects.get_or_create(
         order=order,
         defaults={
             'amount': order.total_price,
@@ -128,26 +128,32 @@ def payment_stripe(request, order_id):
         }
     )
 
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price_data': {
-                'currency': 'eur',
-                'product_data': {
-                    'name': f'Commande #{order.id}',
+    if payment.status == 'paid':
+        return redirect('order_summary', order_id=order.id)
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': f'Commande #{order.id}',
+                    },
+                    'unit_amount': int(float(order.total_price) * 100),
                 },
-                'unit_amount': int(order.total_price * 100),
-            },
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=request.build_absolute_uri(
-            f'/orders/success/{order.id}/'
-        ),
-        cancel_url=request.build_absolute_uri(
-            f'/orders/summary/{order.id}/'
-        ),
-    )
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri(
+                f'/orders/success/{order.id}/'
+            ),
+            cancel_url=request.build_absolute_uri(
+                f'/orders/summary/{order.id}/'
+            ),
+        )
+    except stripe.error.StripeError:
+        return render(request, 'orders/payment_error.html', {'order': order})
 
     return redirect(session.url)
 
