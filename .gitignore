@@ -1,8 +1,10 @@
-# Python
+# Django media uploads
 media/
+media/**
+
+# Python cache
 __pycache__/
 *.pyc
-*.pyo
 
 # Django
 db.sqlite3
