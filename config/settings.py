@@ -93,3 +93,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Stripe (désactivé par défaut si absent)
 STRIPE_SECRET_KEY = ''
 STRIPE_PUBLIC_KEY = ''
+
+# ======================
+# MEDIA FILES (IMAGES)
+# ======================
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
